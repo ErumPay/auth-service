@@ -1,0 +1,23 @@
+package com.erumpay.auth_service.pin.dto;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class PinResetRequest {
+
+    @NotNull(message = "SMS 인증 ID는 필수입니다")
+    private Long verificationId;
+
+    @NotBlank(message = "새 PIN은 필수입니다")
+    @Pattern(regexp = "^\\d{6}$", message = "PIN은 6자리 숫자만 허용")
+    private String newPin;
+
+    @NotBlank(message = "새 PIN 확인은 필수입니다")
+    @Pattern(regexp = "^\\d{6}$", message = "PIN은 6자리 숫자만 허용")
+    private String newPinConfirm;
+}
