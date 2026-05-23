@@ -1,0 +1,62 @@
+spring:
+  application:
+    name: auth-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3308/auth_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
+    username: erumpay
+    password: erumpay1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+    open-in-view: false
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+server:
+  port: 8081
+
+# JWT
+jwt:
+  secret: erumpay-auth-service-jwt-secret-key-must-be-at-least-256-bits-long-for-hs256
+  access-token-expiry: 1800000      # 30분 (ms)
+  refresh-token-expiry: 2592000000   # 30일 (ms)
+  refresh-token-rotation-threshold: 259200000  # 3일 (ms)
+
+# 암호화
+encryption:
+  aes-secret-key: erumpay-aes-256-secret-key-32b!!
+  phone-hash-salt: erumpay-phone-hash-fixed-salt-value
+
+# Kakao OAuth
+kakao:
+  client-id: ${KAKAO_CLIENT_ID:test-kakao-client-id}
+  redirect-uri: ${KAKAO_REDIRECT_URI:http://localhost:8081/api/auth/kakao/callback}
+  token-url: https://kauth.kakao.com/oauth/token
+  user-info-url: https://kapi.kakao.com/v2/user/me
+
+# Octomo SMS
+octomo:
+  api-url: ${OCTOMO_API_URL:https://api.octomo.co.kr}
+  receiver-number: "1666-3538"
+
+# Logging
+logging:
+  level:
+    com.erumpay.auth_service: DEBUG
+    org.hibernate.SQL: DEBUG
