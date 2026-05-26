@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/auth/dev")
+@RequestMapping("/api/v1/auth/dev")
 @RequiredArgsConstructor
 @Profile("dev")
 public class DevTokenController {

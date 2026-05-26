@@ -9,6 +9,6 @@ import java.util.Map;
 @FeignClient(name = "payment-service", url = "${feign.payment-service.url:http://localhost:8082}")
 public interface PaymentServiceClient {
 
-    @GetMapping("/api/internal/payments/users/{userId}/pending")
+    @GetMapping("/api/v1/internal/payments/users/{userId}/pending")
     Map<String, Object> checkPendingTransactions(@PathVariable Long userId);
 }

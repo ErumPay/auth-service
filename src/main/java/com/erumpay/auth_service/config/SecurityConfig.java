@@ -25,11 +25,11 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // 인증 없이 접근 가능
                 .requestMatchers(
-                    "/api/auth/dev/**",
-                    "/api/auth/kakao/**",
-                    "/api/auth/sms/**",
-                    "/api/auth/token/refresh",
-                    "/api/internal/**",
+                    "/api/v1/auth/dev/**",
+                    "/api/v1/auth/kakao/**",
+                    "/api/v1/auth/sms/**",
+                    "/api/v1/auth/token/refresh",
+                    "/api/v1/internal/**",
                     "/swagger-ui/**",
                     "/swagger-ui.html",
                     "/v3/api-docs/**",

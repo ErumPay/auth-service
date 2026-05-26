@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/auth/sms")
+@RequestMapping("/api/v1/auth/sms")
 @RequiredArgsConstructor
 public class SmsController {
 

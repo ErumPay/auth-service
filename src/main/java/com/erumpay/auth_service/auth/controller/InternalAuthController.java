@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/internal")
+@RequestMapping("/api/v1/internal")
 @RequiredArgsConstructor
 public class InternalAuthController {
 
