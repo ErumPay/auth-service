@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/auth/pin")
+@RequestMapping("/api/v1/auth/pin")
 @RequiredArgsConstructor
 public class PinController {
 
