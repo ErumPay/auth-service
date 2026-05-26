@@ -28,6 +28,7 @@ public class KakaoOAuthService {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "authorization_code");
         params.add("client_id", kakaoProperties.getClientId());
+        params.add("client_secret", kakaoProperties.getClientSecret());
         params.add("redirect_uri", kakaoProperties.getRedirectUri());
         params.add("code", authorizationCode);
 

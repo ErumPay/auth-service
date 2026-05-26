@@ -45,8 +45,9 @@ encryption:
 
 # Kakao OAuth
 kakao:
-  client-id: ${KAKAO_CLIENT_ID:test-kakao-client-id}
-  redirect-uri: ${KAKAO_REDIRECT_URI:http://localhost:8081/api/auth/kakao/callback}
+  client-id: ${KAKAO_CLIENT_ID:a9ddde86a3170826eec3646458bb5079}
+  client-secret: ${KAKAO_CLIENT_SECRET:Z56B0xNYx5AKQ8whSsfenNVOxZBQSGMZ}
+  redirect-uri: ${KAKAO_REDIRECT_URI:http://localhost:8081/api/v1/auth/kakao/callback}
   token-url: https://kauth.kakao.com/oauth/token
   user-info-url: https://kapi.kakao.com/v2/user/me
 
