@@ -9,6 +9,6 @@ import java.util.Map;
 @FeignClient(name = "card-service", url = "${feign.card-service.url:http://localhost:8083}")
 public interface CardServiceClient {
 
-    @PostMapping("/api/v1/internal/cards/users/{userId}/deactivate-billing-keys")
+    @PostMapping("/internal/v1/cards/users/{userId}/deactivate-billing-keys")
     Map<String, Object> deactivateBillingKeys(@PathVariable Long userId);
 }
