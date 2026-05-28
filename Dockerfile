@@ -11,9 +11,15 @@ RUN chmod +x ./gradlew && ./gradlew clean bootJar --no-daemon
 
 FROM eclipse-temurin:21-jre
 
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
 WORKDIR /app
 
 COPY --from=builder /app/build/libs/*.jar app.jar
+
+RUN chown appuser:appuser app.jar
+
+USER appuser
 
 EXPOSE 8081
 
