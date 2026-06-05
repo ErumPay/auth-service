@@ -19,4 +19,6 @@ public class KakaoOAuthRequest {
     private Boolean privacyTermsAgreed;
 
     private Boolean marketingTermsAgreed;
+
+    private String redirectUri;
 }

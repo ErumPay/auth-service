@@ -46,7 +46,7 @@ public class AuthService {
         }
 
         // 카카오 인가 코드로 토큰 발급 → 사용자 정보 조회
-        String kakaoAccessToken = kakaoOAuthService.getAccessToken(request.getAuthorizationCode());
+        String kakaoAccessToken = kakaoOAuthService.getAccessToken(request.getAuthorizationCode(), request.getRedirectUri());
         KakaoUserInfo userInfo = kakaoOAuthService.getUserInfo(kakaoAccessToken);
 
         // 기존 회원 확인
