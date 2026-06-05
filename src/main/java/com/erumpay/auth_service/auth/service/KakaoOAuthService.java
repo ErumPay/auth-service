@@ -21,15 +21,19 @@ public class KakaoOAuthService {
     private final KakaoProperties kakaoProperties;
     private final RestTemplate restTemplate = new RestTemplate();
 
-    public String getAccessToken(String authorizationCode) {
+    public String getAccessToken(String authorizationCode, String redirectUri) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        String resolvedRedirectUri = (redirectUri != null && !redirectUri.isBlank())
+                ? redirectUri
+                : kakaoProperties.getRedirectUri();
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "authorization_code");
         params.add("client_id", kakaoProperties.getClientId());
         params.add("client_secret", kakaoProperties.getClientSecret());
-        params.add("redirect_uri", kakaoProperties.getRedirectUri());
+        params.add("redirect_uri", resolvedRedirectUri);
         params.add("code", authorizationCode);
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
