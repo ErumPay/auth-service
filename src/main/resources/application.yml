@@ -1,4 +1,7 @@
 spring:
+  config:
+    import: optional:file:.env[.properties]
+
   application:
     name: auth-service
 
@@ -53,7 +56,8 @@ kakao:
 
 # Octomo SMS
 octomo:
-  api-url: ${OCTOMO_API_URL:https://api.octomo.co.kr}
+  api-url: ${OCTOMO_API_URL:https://api.octoverse.kr/octomo/v1/public/message/exists}
+  api-key: ${OCTOMO_API_KEY}
   receiver-number: "1666-3538"
 
 # Logging

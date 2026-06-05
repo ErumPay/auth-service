@@ -3,6 +3,8 @@ package com.erumpay.auth_service.sms.service;
 import com.erumpay.auth_service.auth.repository.AuthUserRepository;
 import com.erumpay.auth_service.common.exception.AuthException;
 import com.erumpay.auth_service.common.util.AesEncryptionUtil;
+import com.erumpay.auth_service.config.OctomoProperties;
+import com.erumpay.auth_service.sms.client.OctomoClient;
 import com.erumpay.auth_service.sms.dto.SmsCodeRequest;
 import com.erumpay.auth_service.sms.dto.SmsCodeResponse;
 import com.erumpay.auth_service.sms.dto.SmsVerifyRequest;
@@ -26,8 +28,9 @@ public class SmsService {
     private final AuthSmsVerificationRepository smsRepository;
     private final AuthUserRepository userRepository;
     private final AesEncryptionUtil aesEncryptionUtil;
+    private final OctomoClient octomoClient;
+    private final OctomoProperties octomoProperties;
     private static final SecureRandom RANDOM = new SecureRandom();
-    private static final String RECEIVER_NUMBER = "1666-3538";
 
     @Transactional
     public SmsCodeResponse generateCode(Long userId, SmsCodeRequest request) {
@@ -59,7 +62,7 @@ public class SmsService {
 
         return SmsCodeResponse.builder()
                 .verificationId(verification.getVerificationId())
-                .smsReceiverNumber(RECEIVER_NUMBER)
+                .smsReceiverNumber(octomoProperties.getReceiverNumber())
                 .verificationCode(code)
                 .expiresAt(expiresAt)
                 .build();
@@ -77,6 +80,12 @@ public class SmsService {
 
         if (!verification.getVerificationCode().equals(request.getCode())) {
             throw new AuthException(HttpStatus.BAD_REQUEST, "인증번호 불일치");
+        }
+
+        String phoneNumber = aesEncryptionUtil.decrypt(verification.getPhoneNumber());
+        boolean exists = octomoClient.existsMessage(phoneNumber, request.getCode());
+        if (!exists) {
+            throw new AuthException(HttpStatus.BAD_REQUEST, "Octomo 문자 인증 미확인");
         }
 
         verification.setIsVerified(true);
