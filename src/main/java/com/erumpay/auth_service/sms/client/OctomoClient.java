@@ -11,6 +11,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -23,7 +24,9 @@ import java.util.Map;
 public class OctomoClient {
 
     private final OctomoProperties octomoProperties;
-    private final RestTemplate restTemplate = new RestTemplate();
+
+    @Qualifier("octomoRestTemplate")
+    private final RestTemplate restTemplate;
 
     public boolean existsMessage(String mobileNum, String text) {
         if (octomoProperties.getApiKey() == null || octomoProperties.getApiKey().isBlank()) {
@@ -41,7 +44,7 @@ public class OctomoClient {
         );
 
         try {
-            log.info("[Octomo] 문자 조회 요청 - mobileNum: {}, text: {}", mobileNum, text);
+            log.info("[Octomo] 문자 조회 요청 - mobileNum: {}", maskMobileNum(mobileNum));
             ResponseEntity<OctomoExistsResponse> response = restTemplate.postForEntity(
                     octomoProperties.getApiUrl(),
                     request,
@@ -53,9 +56,17 @@ public class OctomoClient {
             log.info("[Octomo] 문자 조회 응답 - status: {}, verified: {}", response.getStatusCode(), verified);
             return verified;
         } catch (RestClientException e) {
-            log.error("Octomo 문자 조회 API 호출 실패", e);
+            log.error("Octomo 문자 조회 API 호출 실패: {}", e.getMessage(), e);
             throw new AuthException(HttpStatus.BAD_GATEWAY, "Octomo API 호출 오류");
         }
+    }
+
+    private String maskMobileNum(String mobileNum) {
+        if (mobileNum == null || mobileNum.length() < 7) {
+            return "****";
+        }
+
+        return mobileNum.substring(0, 3) + "****" + mobileNum.substring(mobileNum.length() - 4);
     }
 
     @Getter
