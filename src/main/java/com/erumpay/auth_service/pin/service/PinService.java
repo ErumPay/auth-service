@@ -186,7 +186,7 @@ public class PinService {
     private void validatePinPattern(String pin) {
         if (pinHashUtil.isWeakPattern(pin)) {
             throw new AuthException(HttpStatus.BAD_REQUEST,
-                    "취약 패턴 — 연속 숫자 또는 동일 숫자 4자리 이상");
+                    "연속 숫자 또는 동일 숫자 4자리 이상은 사용할 수 없습니다.");
         }
     }
 }
