@@ -94,7 +94,7 @@ public class PinService {
         return Map.of("message", "PIN 변경 완료");
     }
 
-    // 22. PIN 재설정 (10회 실패 후 SMS 재인증)
+    // 22. PIN 재설정 (SMS 재인증 후 새 PIN 설정)
     @Transactional
     public Map<String, String> resetPin(Long userId, PinResetRequest request) {
         if (!request.getNewPin().equals(request.getNewPinConfirm())) {
@@ -102,16 +102,21 @@ public class PinService {
         }
         validatePinPattern(request.getNewPin());
 
-        AuthPin pin = getActivePin(userId);
-
-        if (pin.getFailCount() < 10) {
-            throw new AuthException(HttpStatus.FORBIDDEN, "PIN 재설정 대상이 아님 (fail_count < 10)");
-        }
-
         // SMS 인증 완료 확인
         AuthSmsVerification sms = smsRepository
                 .findByVerificationIdAndIsVerifiedTrueAndDeletedAtIsNull(request.getVerificationId())
                 .orElseThrow(() -> new AuthException(HttpStatus.FORBIDDEN, "SMS 재인증 미완료 상태"));
+        if (sms.getUser() == null || !sms.getUser().getUserId().equals(userId)) {
+            throw new AuthException(HttpStatus.FORBIDDEN, "현재 사용자와 SMS 인증 정보가 일치하지 않음");
+        }
+
+        AuthUser user = userRepository.findById(userId)
+                .orElseThrow(() -> new AuthException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없음"));
+        AuthPin pin = pinRepository.findByUser_UserIdAndDeletedAtIsNull(userId)
+                .orElseGet(() -> AuthPin.builder()
+                        .user(user)
+                        .failCount(0)
+                        .build());
 
         String newSalt = pinHashUtil.generateSalt();
         pin.setPinHash(pinHashUtil.hashPin(request.getNewPin(), newSalt));
@@ -119,6 +124,11 @@ public class PinService {
         pin.setFailCount(0);
         pin.setFailLastAt(null);
         pin.setLockedUntil(null);
+        pinRepository.save(pin);
+
+        if (user.getStatus() == UserStatus.PENDING) {
+            user.setStatus(UserStatus.ACTIVE);
+        }
 
         return Map.of("message", "PIN 재설정 완료");
     }
