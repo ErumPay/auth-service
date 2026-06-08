@@ -47,10 +47,10 @@ public class AuthUser {
     @Column(name = "withdrawn_at")
     private LocalDateTime withdrawnAt;
 
-    @Column(name = "service_terms_agreed_at", nullable = false)
+    @Column(name = "service_terms_agreed_at")
     private LocalDateTime serviceTermsAgreedAt;
 
-    @Column(name = "privacy_terms_agreed_at", nullable = false)
+    @Column(name = "privacy_terms_agreed_at")
     private LocalDateTime privacyTermsAgreedAt;
 
     @Column(name = "marketing_terms_agreed_at")
