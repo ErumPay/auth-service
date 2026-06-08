@@ -25,6 +25,15 @@ public class AuthController {
         return ResponseEntity.ok(authService.kakaoOAuthLogin(request));
     }
 
+    // 02. 약관 동의 (카카오 로그인 후 신규 회원)
+    @PostMapping("/terms/agree")
+    public ResponseEntity<Map<String, String>> agreeTerms(
+            @AuthenticationPrincipal Long userId,
+            @Valid @RequestBody TermsAgreementRequest request) {
+        authService.agreeTerms(userId, request.getServiceTermsAgreed(), request.getPrivacyTermsAgreed(), request.getMarketingTermsAgreed());
+        return ResponseEntity.ok(Map.of("message", "약관 동의 완료"));
+    }
+
     // 06. Access Token 재발급
     @PostMapping("/token/refresh")
     public ResponseEntity<TokenRefreshResponse> refreshToken(
