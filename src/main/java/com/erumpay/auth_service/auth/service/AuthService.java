@@ -72,7 +72,25 @@ public class AuthService {
 
     private KakaoOAuthResponse handleExistingUser(AuthUser user) {
         if (user.getStatus() == UserStatus.WITHDRAWN) {
-            throw new AuthException(HttpStatus.CONFLICT, "이미 가입된 카카오 계정 (kakao_oauth_id 중복)");
+            // 탈퇴 유저 재가입: 상태 초기화
+            user.setStatus(UserStatus.PENDING);
+            user.setWithdrawnAt(null);
+            user.setServiceTermsAgreedAt(null);
+            user.setPrivacyTermsAgreedAt(null);
+            user.setMarketingTermsAgreedAt(null);
+
+            String accessToken = jwtTokenProvider.createAccessToken(user.getUserId(), user.getStatus().name());
+            String refreshToken = jwtTokenProvider.createRefreshToken(user.getUserId());
+            saveRefreshToken(user, refreshToken);
+
+            return KakaoOAuthResponse.builder()
+                    .isNewUser(true)
+                    .userId(user.getUserId())
+                    .name(user.getName())
+                    .accessToken(accessToken)
+                    .refreshToken(refreshToken)
+                    .status(user.getStatus().name())
+                    .build();
         }
 
         String accessToken = jwtTokenProvider.createAccessToken(user.getUserId(), user.getStatus().name());
