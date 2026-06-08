@@ -1,0 +1,67 @@
+spring:
+  config:
+    import: optional:file:.env[.properties]
+
+  application:
+    name: auth-service
+
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+    open-in-view: false
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: 6379
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+server:
+  port: 8081
+
+# JWT
+jwt:
+  secret: ${JWT_SECRET}
+  access-token-expiry: 1800000      # 30분 (ms)
+  refresh-token-expiry: 2592000000   # 30일 (ms)
+  refresh-token-rotation-threshold: 259200000  # 3일 (ms)
+
+# 암호화
+encryption:
+  aes-secret-key: ${AES_SECRET_KEY}
+  phone-hash-salt: ${PHONE_HASH_SALT}
+
+# Kakao OAuth
+kakao:
+  client-id: ${KAKAO_CLIENT_ID}
+  client-secret: ${KAKAO_CLIENT_SECRET}
+  redirect-uri: ${KAKAO_REDIRECT_URI}
+  token-url: https://kauth.kakao.com/oauth/token
+  user-info-url: https://kapi.kakao.com/v2/user/me
+
+# Octomo SMS
+octomo:
+  api-url: ${OCTOMO_API_URL:https://api.octoverse.kr/octomo/v1/public/message/exists}
+  api-key: ${OCTOMO_API_KEY}
+  receiver-number: "1666-3538"
+
+# Logging
+logging:
+  level:
+    com.erumpay.auth_service: DEBUG
+    org.hibernate.SQL: DEBUG
