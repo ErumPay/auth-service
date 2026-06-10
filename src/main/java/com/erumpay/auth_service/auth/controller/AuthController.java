@@ -3,6 +3,7 @@ package com.erumpay.auth_service.auth.controller;
 import com.erumpay.auth_service.auth.dto.*;
 import com.erumpay.auth_service.auth.service.AuthService;
 import com.erumpay.auth_service.auth.service.WithdrawService;
+import com.erumpay.auth_service.common.feign.dto.UserWithdrawalResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -57,5 +58,12 @@ public class AuthController {
             @AuthenticationPrincipal Long userId,
             @Valid @RequestBody WithdrawRequest request) {
         return ResponseEntity.ok(withdrawService.withdraw(userId, request.getPin()));
+    }
+
+    // 08-1. 회원탈퇴 가능 여부 조회 (모바일 사전 검증용)
+    @GetMapping("/withdraw/eligibility")
+    public ResponseEntity<UserWithdrawalResponse> getWithdrawalEligibility(
+            @AuthenticationPrincipal Long userId) {
+        return ResponseEntity.ok(withdrawService.checkWithdrawalEligibility(userId));
     }
 }
