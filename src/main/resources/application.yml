@@ -60,6 +60,13 @@ octomo:
   api-key: ${OCTOMO_API_KEY}
   receiver-number: "1666-3538"
 
+# Feign Clients
+feign:
+  payment-service:
+    url: ${FEIGN_PAYMENT_SERVICE_URL:http://localhost:8083}
+  card-service:
+    url: ${FEIGN_CARD_SERVICE_URL:http://localhost:8082}
+
 # Logging
 logging:
   level:
