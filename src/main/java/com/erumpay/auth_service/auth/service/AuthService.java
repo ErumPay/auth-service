@@ -39,12 +39,6 @@ public class AuthService {
 
     @Transactional
     public KakaoOAuthResponse kakaoOAuthLogin(KakaoOAuthRequest request) {
-        // 필수 약관 동의 확인
-        if (!Boolean.TRUE.equals(request.getServiceTermsAgreed())
-                || !Boolean.TRUE.equals(request.getPrivacyTermsAgreed())) {
-            throw new AuthException(HttpStatus.BAD_REQUEST, "필수 약관(서비스이용약관, 개인정보처리방침) 미동의");
-        }
-
         // 카카오 인가 코드로 토큰 발급 → 사용자 정보 조회
         String kakaoAccessToken = kakaoOAuthService.getAccessToken(request.getAuthorizationCode(), request.getRedirectUri());
         KakaoUserInfo userInfo = kakaoOAuthService.getUserInfo(kakaoAccessToken);
@@ -59,9 +53,44 @@ public class AuthService {
         }
     }
 
+    @Transactional
+    public void agreeTerms(Long userId, boolean serviceTermsAgreed, boolean privacyTermsAgreed, Boolean marketingTermsAgreed) {
+        if (!serviceTermsAgreed || !privacyTermsAgreed) {
+            throw new AuthException(HttpStatus.BAD_REQUEST, "필수 약관(서비스이용약관, 개인정보처리방침) 미동의");
+        }
+
+        AuthUser user = authUserRepository.findById(userId)
+                .orElseThrow(() -> new AuthException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없음"));
+
+        LocalDateTime now = LocalDateTime.now();
+        user.setServiceTermsAgreedAt(now);
+        user.setPrivacyTermsAgreedAt(now);
+        if (Boolean.TRUE.equals(marketingTermsAgreed)) {
+            user.setMarketingTermsAgreedAt(now);
+        }
+    }
+
     private KakaoOAuthResponse handleExistingUser(AuthUser user) {
         if (user.getStatus() == UserStatus.WITHDRAWN) {
-            throw new AuthException(HttpStatus.CONFLICT, "이미 가입된 카카오 계정 (kakao_oauth_id 중복)");
+            // 탈퇴 유저 재가입: 상태 초기화
+            user.setStatus(UserStatus.PENDING);
+            user.setWithdrawnAt(null);
+            user.setServiceTermsAgreedAt(null);
+            user.setPrivacyTermsAgreedAt(null);
+            user.setMarketingTermsAgreedAt(null);
+
+            String accessToken = jwtTokenProvider.createAccessToken(user.getUserId(), user.getStatus().name());
+            String refreshToken = jwtTokenProvider.createRefreshToken(user.getUserId());
+            saveRefreshToken(user, refreshToken);
+
+            return KakaoOAuthResponse.builder()
+                    .isNewUser(true)
+                    .userId(user.getUserId())
+                    .name(user.getName())
+                    .accessToken(accessToken)
+                    .refreshToken(refreshToken)
+                    .status(user.getStatus().name())
+                    .build();
         }
 
         String accessToken = jwtTokenProvider.createAccessToken(user.getUserId(), user.getStatus().name());
@@ -91,8 +120,6 @@ public class AuthService {
             throw new AuthException(HttpStatus.CONFLICT, "이미 가입된 카카오 계정 (kakao_oauth_id 중복)");
         }
 
-        LocalDateTime now = LocalDateTime.now();
-
         AuthUser newUser = AuthUser.builder()
                 .kakaoOauthId(userInfo.getKakaoOauthId())
                 .phoneNumber(userInfo.getPhoneNumber() != null ? aesEncryptionUtil.encrypt(userInfo.getPhoneNumber()) : null)
@@ -100,9 +127,6 @@ public class AuthService {
                 .name(userInfo.getName())
                 .birthDate(userInfo.getBirthDate() != null ? aesEncryptionUtil.encrypt(userInfo.getBirthDate()) : null)
                 .status(UserStatus.PENDING)
-                .serviceTermsAgreedAt(now)
-                .privacyTermsAgreedAt(now)
-                .marketingTermsAgreedAt(Boolean.TRUE.equals(request.getMarketingTermsAgreed()) ? now : null)
                 .build();
 
         authUserRepository.save(newUser);

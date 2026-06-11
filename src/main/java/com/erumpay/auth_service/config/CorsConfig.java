@@ -1,4 +1,4 @@
-package com.erumpay.auth_service;
+package com.erumpay.auth_service.config;
 
 import java.util.Arrays;
 

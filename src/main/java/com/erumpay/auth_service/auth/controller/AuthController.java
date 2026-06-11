@@ -3,6 +3,7 @@ package com.erumpay.auth_service.auth.controller;
 import com.erumpay.auth_service.auth.dto.*;
 import com.erumpay.auth_service.auth.service.AuthService;
 import com.erumpay.auth_service.auth.service.WithdrawService;
+import com.erumpay.auth_service.common.feign.dto.UserWithdrawalResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,15 @@ public class AuthController {
     @PostMapping("/kakao/login")
     public ResponseEntity<KakaoOAuthResponse> kakaoLogin(@Valid @RequestBody KakaoOAuthRequest request) {
         return ResponseEntity.ok(authService.kakaoOAuthLogin(request));
+    }
+
+    // 02. 약관 동의 (카카오 로그인 후 신규 회원)
+    @PostMapping("/terms/agree")
+    public ResponseEntity<Map<String, String>> agreeTerms(
+            @AuthenticationPrincipal Long userId,
+            @Valid @RequestBody TermsAgreementRequest request) {
+        authService.agreeTerms(userId, request.getServiceTermsAgreed(), request.getPrivacyTermsAgreed(), request.getMarketingTermsAgreed());
+        return ResponseEntity.ok(Map.of("message", "약관 동의 완료"));
     }
 
     // 06. Access Token 재발급
@@ -48,5 +58,12 @@ public class AuthController {
             @AuthenticationPrincipal Long userId,
             @Valid @RequestBody WithdrawRequest request) {
         return ResponseEntity.ok(withdrawService.withdraw(userId, request.getPin()));
+    }
+
+    // 08-1. 회원탈퇴 가능 여부 조회 (모바일 사전 검증용)
+    @GetMapping("/withdraw/eligibility")
+    public ResponseEntity<UserWithdrawalResponse> getWithdrawalEligibility(
+            @AuthenticationPrincipal Long userId) {
+        return ResponseEntity.ok(withdrawService.checkWithdrawalEligibility(userId));
     }
 }
